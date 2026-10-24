@@ -1,0 +1,102 @@
+key: semantic
+title: Semantic Search (Embeddings + BM25)
+description: Searches the full page content with BM25 and by meaning with vector embeddings from any OpenAI-compatible endpoint (llama.cpp, Ollama, vLLM, OpenAI). Results of both are fused (hybrid). Prefix a query with "kw:" or "sem:" to force keyword-only or semantic-only search.
+author: Sebastian Pachl
+logo: https://static.requarks.io/logo/database.svg
+website: https://github.com/Pacman1984/wikijs-semantic-search
+isAvailable: true
+props:
+  mode:
+    type: String
+    title: Default Search Mode
+    hint: 'hybrid = keyword and semantic results fused (recommended), semantic = meaning only, keyword = BM25 full-text only. Users can override per query with the prefixes kw:, sem: or hyb:.'
+    default: hybrid
+    enum:
+      - hybrid
+      - semantic
+      - keyword
+    order: 1
+  embeddingUrl:
+    type: String
+    title: Embeddings API Base URL
+    hint: 'OpenAI-compatible base URL without /embeddings, e.g. http://localhost:11434/v1 (Ollama), http://gpu-host:8080/v1 (llama.cpp) or https://api.openai.com/v1. Leave empty to run keyword search only.'
+    default: ''
+    order: 2
+  embeddingModel:
+    type: String
+    title: Embedding Model
+    hint: 'Model name as expected by the endpoint, e.g. Qwen/Qwen3-Embedding-4B, nomic-embed-text, text-embedding-3-small. Changing it re-embeds all pages in the background.'
+    default: ''
+    order: 3
+  embeddingApiKey:
+    type: String
+    title: API Key
+    hint: 'Sent as "Authorization: Bearer <key>". Leave empty for local endpoints without authentication.'
+    default: ''
+    sensitive: true
+    order: 4
+  embeddingDimensions:
+    type: Number
+    title: Embedding Dimensions
+    hint: '0 = model default. Only set this for models that support shortened embeddings (Matryoshka), e.g. OpenAI text-embedding-3-*.'
+    default: 0
+    order: 5
+  queryInstruction:
+    type: String
+    title: Query Instruction
+    hint: 'Instruction-tuned models (Qwen3-Embedding, E5, GTE) expect queries as "Instruct: <this text>\nQuery: <query>". Leave empty for models without instructions (nomic, OpenAI).'
+    default: Given a search query, retrieve relevant wiki passages that answer the query
+    order: 6
+  semanticMinScore:
+    type: Number
+    title: Minimum Semantic Similarity
+    hint: 'Cosine similarity (0–1) a passage needs to count as a semantic match. Raise it if semantic search returns unrelated pages, lower it if it misses paraphrases. Depends on the model; 0.3 suits Qwen3-Embedding.'
+    default: 0.3
+    order: 7
+  semanticRelativeCutoff:
+    type: Number
+    title: Semantic Relative Cutoff
+    hint: 'Keep semantic matches scoring at least this share of the best match (0–1). 0.8 keeps the clearly related pages; lower it for longer result lists, 0 disables.'
+    default: 0.8
+    order: 8
+  keywordRelativeCutoff:
+    type: Number
+    title: Keyword Relative Cutoff
+    hint: 'Keep keyword matches scoring at least this share of the best match (0–1). Drops pages that only share a minor term with the query; 0 disables.'
+    default: 0.25
+    order: 9
+  semanticWeight:
+    type: Number
+    title: Semantic Weight (Hybrid)
+    hint: 'Share of the semantic ranking in hybrid mode, 0–1. 0.5 = equal weight.'
+    default: 0.5
+    order: 10
+  chunkSize:
+    type: Number
+    title: Chunk Size (characters)
+    hint: 'Pages are split at headings, long sections into chunks of this many characters. Keep chunks well below the context length of the embedding model.'
+    default: 1500
+    order: 11
+  chunkOverlap:
+    type: Number
+    title: Chunk Overlap (characters)
+    default: 200
+    order: 12
+  batchSize:
+    type: Number
+    title: Embedding Batch Size
+    hint: 'Chunks sent per embedding request. Lower it for small GPUs or endpoints shared with other services.'
+    default: 16
+    order: 13
+  requestTimeout:
+    type: Number
+    title: Request Timeout (seconds)
+    hint: 'Applies to indexing requests. Search queries use at most 10 seconds and fall back to keyword search on timeout.'
+    default: 60
+    order: 14
+  excludePaths:
+    type: String
+    title: Excluded Path Prefixes
+    hint: 'Comma-separated path prefixes that are never indexed nor returned, e.g. private/, drafts/.'
+    default: 'private/'
+    order: 15

@@ -1,0 +1,20 @@
+{
+  "name": "wikijs-semantic-search",
+  "version": "0.1.0",
+  "description": "Semantic + BM25 hybrid search engine module for Wiki.js 2.x, using any OpenAI-compatible embeddings endpoint",
+  "license": "AGPL-3.0-only",
+  "author": "Sebastian Pachl",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pacman1984/wikijs-semantic-search.git"
+  },
+  "keywords": ["wiki.js", "wikijs", "search", "semantic-search", "embeddings", "bm25", "hybrid-search", "rag"],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test \"test/unit/*.test.js\"",
+    "test:e2e": "docker compose -f test/e2e/compose.yml up --build --abort-on-container-exit --exit-code-from e2e e2e; docker compose -f test/e2e/compose.yml down -v"
+  }
+}

@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test
+
+  e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        wiki: ['2.5.317']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run against Wiki.js ${{ matrix.wiki }}
+        env:
+          WIKI_VERSION: ${{ matrix.wiki }}
+        run: docker compose -f test/e2e/compose.yml up --abort-on-container-exit --exit-code-from e2e e2e
+      - name: Wiki.js log
+        if: always()
+        run: docker compose -f test/e2e/compose.yml logs wiki | tail -100
+      - if: always()
+        run: docker compose -f test/e2e/compose.yml down -v

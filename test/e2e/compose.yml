@@ -1,0 +1,37 @@
+# End-to-end test: a throwaway Wiki.js 2.5.317 with the module mounted,
+# a fake embeddings endpoint and a test runner. Nothing is exposed to the host.
+#   npm run test:e2e
+services:
+  embeddings:
+    image: node:22-alpine
+    working_dir: /app
+    command: node test/e2e/fake-embeddings.js
+    volumes:
+      - ../..:/app:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/health"]
+      interval: 2s
+      retries: 15
+
+  wiki:
+    image: ghcr.io/requarks/wiki:${WIKI_VERSION:-2.5.317}
+    environment:
+      DB_TYPE: sqlite
+      DB_FILEPATH: /wiki/data/db.sqlite
+    volumes:
+      - ../../module:/wiki/server/modules/search/semantic:ro
+
+  e2e:
+    image: node:22-alpine
+    working_dir: /app
+    command: node test/e2e/e2e.js
+    environment:
+      WIKI_URL: http://wiki:3000
+      EMBEDDINGS_URL: http://embeddings:8000/v1
+    volumes:
+      - ../..:/app:ro
+    depends_on:
+      embeddings:
+        condition: service_healthy
+      wiki:
+        condition: service_started
